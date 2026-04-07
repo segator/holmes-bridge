@@ -19,7 +19,7 @@ All configuration is done via environment variables — **no secrets in the code
 | `TELEGRAM_CHAT_ID` | Yes | Telegram chat ID for notifications |
 | `HOLMES_API_URL` | Yes | HolmesGPT API server URL (e.g., `http://holmes.holmesgpt.svc.cluster.local`) |
 | `HOLMES_MODEL` | No | Model name from HolmesGPT modelList (default: `haiku`) |
-| `GRAFANA_URL` | No | External Grafana URL for dashboard links (default: `https://grafana.segator.es`) |
+| `GRAFANA_URL` | No | External Grafana URL for dashboard links |
 | `LOG_LEVEL` | No | Logging level (default: `INFO`) |
 
 ## Development

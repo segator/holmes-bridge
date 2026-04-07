@@ -8,7 +8,12 @@ from telegram import Bot, Update
 from telegram.constants import ParseMode
 from telegram.ext import Application, CommandHandler, ContextTypes
 
-from app.config import TELEGRAM_BOT_TOKEN, TELEGRAM_CHAT_ID, GRAFANA_URL
+from app.config import (
+    TELEGRAM_BOT_TOKEN,
+    TELEGRAM_CHAT_ID,
+    GRAFANA_URL,
+    ALLOWED_CHAT_IDS,
+)
 from app import holmes
 
 logger = logging.getLogger(__name__)
@@ -86,6 +91,10 @@ async def send_investigation_result(alert_title: str, result: dict[str, Any]) ->
 
 async def handle_ask(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     """/ask command handler — send a question to HolmesGPT."""
+    if update.effective_chat.id not in ALLOWED_CHAT_IDS:
+        logger.warning("Unauthorized /ask from chat %s", update.effective_chat.id)
+        return
+
     if not context.args:
         await update.message.reply_text(
             "Usage: /ask <question about the cluster>",
@@ -110,6 +119,9 @@ async def handle_ask(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None
 
 async def handle_help(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     """/help command handler."""
+    if update.effective_chat.id not in ALLOWED_CHAT_IDS:
+        logger.warning("Unauthorized /help from chat %s", update.effective_chat.id)
+        return
     text = (
         "<b>Holmes Bridge Commands</b>\n\n"
         "/ask &lt;question&gt; — Ask the AI about the cluster\n"

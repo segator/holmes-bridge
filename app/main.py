@@ -25,6 +25,12 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
+# Suppress noisy 409 Conflict errors from Telegram polling.
+# These are non-fatal — the library retries automatically and the bot
+# continues to receive updates. The 409 happens due to httpx connection
+# pooling interactions with Telegram's getUpdates long-polling.
+logging.getLogger("telegram.ext.Updater").setLevel(logging.CRITICAL)
+
 # Telegram bot application (for /ask commands via polling)
 bot_app = create_bot_app()
 

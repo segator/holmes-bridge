@@ -32,9 +32,11 @@ def _truncate(text: str, max_len: int = MAX_MSG_LEN) -> str:
 
 
 def format_investigation(alert_title: str, result: dict[str, Any]) -> str:
-    """Format a HolmesGPT investigation result for Telegram (HTML)."""
+    """Format a HolmesGPT investigation result for Telegram (HTML).
+
+    Holmes 0.24.0 /api/chat returns {"analysis": "...", "conversation_history": [...]}.
+    """
     analysis = result.get("analysis", "No analysis available.")
-    tool_calls = result.get("tool_calls", [])
 
     parts = [
         f"<b>AI Investigation</b>",
@@ -42,17 +44,6 @@ def format_investigation(alert_title: str, result: dict[str, Any]) -> str:
         "",
         f"{html.escape(analysis)}",
     ]
-
-    if tool_calls:
-        tools_used = set()
-        for tc in tool_calls:
-            tool_name = tc.get("tool_name") or tc.get("function", {}).get(
-                "name", "unknown"
-            )
-            tools_used.add(tool_name)
-        if tools_used:
-            parts.append("")
-            parts.append(f"<b>Tools used:</b> {', '.join(sorted(tools_used))}")
 
     return _truncate("\n".join(parts))
 

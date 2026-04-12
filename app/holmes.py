@@ -19,27 +19,29 @@ async def investigate(
     subject: dict[str, Any] | None = None,
     context: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
-    """Send an investigation request to HolmesGPT.
+    """Send an investigation request to HolmesGPT via /api/chat.
 
-    Uses POST /api/investigate for structured alert investigation.
+    Holmes 0.24.0 removed /api/investigate. We compose a prompt from
+    the alert details and use /api/chat instead.
     """
-    payload: dict[str, Any] = {
-        "source": "grafana",
-        "title": title,
-        "description": description,
-        "model": HOLMES_MODEL,
-        "include_tool_calls": True,
-    }
-    if subject:
-        payload["subject"] = subject
-    if context:
-        payload["context"] = context
+    # Build a rich prompt from the alert details
+    prompt_parts = [
+        f"Investigate this Grafana alert:",
+        f"Alert: {title}",
+    ]
+    if description:
+        prompt_parts.append(f"Details: {description}")
+    if context and context.get("labels"):
+        labels = context["labels"]
+        labels_str = ", ".join(f"{k}={v}" for k, v in labels.items())
+        prompt_parts.append(f"Labels: {labels_str}")
 
-    logger.info("Investigating: %s", title)
-    async with httpx.AsyncClient(timeout=_TIMEOUT) as client:
-        resp = await client.post(f"{HOLMES_API_URL}/api/investigate", json=payload)
-        resp.raise_for_status()
-        return resp.json()
+    prompt_parts.append(
+        "Investigate the root cause, check relevant pods/logs/metrics, "
+        "and suggest a fix if possible."
+    )
+
+    return await chat("\n".join(prompt_parts))
 
 
 async def chat(
@@ -47,7 +49,7 @@ async def chat(
 ) -> dict[str, Any]:
     """Send a freeform question to HolmesGPT.
 
-    Uses POST /api/chat for interactive Telegram /ask commands.
+    Uses POST /api/chat (the only endpoint in Holmes 0.24.0+).
     """
     payload: dict[str, Any] = {
         "ask": question,

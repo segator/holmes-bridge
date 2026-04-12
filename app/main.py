@@ -35,7 +35,10 @@ async def lifespan(app: FastAPI):
     logger.info("Starting Telegram bot polling...")
     await bot_app.initialize()
     await bot_app.start()
-    await bot_app.updater.start_polling(drop_pending_updates=True)
+    await bot_app.updater.start_polling(
+        drop_pending_updates=True,
+        allowed_updates=["message"],  # Only receive message updates
+    )
     logger.info("Holmes Bridge started")
     yield
     logger.info("Shutting down Telegram bot...")

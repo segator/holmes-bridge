@@ -38,6 +38,7 @@ async def lifespan(app: FastAPI):
     await bot_app.updater.start_polling(
         drop_pending_updates=True,
         allowed_updates=["message"],  # Only receive message updates
+        poll_interval=1.0,  # 1s delay between polls to avoid 409 conflicts
     )
     logger.info("Holmes Bridge started")
     yield

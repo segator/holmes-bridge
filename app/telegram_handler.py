@@ -141,7 +141,7 @@ def create_bot_app() -> Application:
     app = (
         Application.builder()
         .token(TELEGRAM_BOT_TOKEN)
-        .read_timeout(30)
+        .read_timeout(15)
         .connect_timeout(10)
         .pool_timeout(10)
         .build()
